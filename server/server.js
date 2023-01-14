@@ -26,7 +26,6 @@ const connection = mysql.createConnection({
     host: "127.0.0.1",
     user: "root",
     password: "$Delfinek#21!",
-    database: "rcubedb"
 });
 
 connection.connect((err) => {
@@ -39,7 +38,7 @@ connection.connect((err) => {
 
 
 app.get('/api/users', (req, res) => {
-    connection.query('select * from regusers', (err, results) => {
+    connection.query("select * from SampleApp.Results where personName = 'Patryk Zawieja'", (err, results) => {
         if (err) {
             console.log(err);
         }
@@ -54,7 +53,7 @@ app.post('/api/login_req', async (req, res) => {
 
     try {
         // get the user from the database
-        const [rows, fields] = await connection.promise().query('SELECT * FROM regusers WHERE username = ?', [username]);
+        const [rows, fields] = await connection.promise().query('SELECT * FROM rcubedb.regusers WHERE username = ?', [username]);
         const user = rows[0];
 
         // check if user exists
@@ -86,13 +85,13 @@ app.post('/api/sign',async (req,res) =>{
     const {username, password} = req.body;
     console.log(username,password)
     try{
-        const [rows, fields] = await connection.promise().query('SELECT * FROM regusers WHERE username = ?', [username]);
+        const [rows, fields] = await connection.promise().query('SELECT * FROM rcubedb.regusers WHERE username = ?', [username]);
         const user = rows[0];
         console.log(user)
         if(user){
             res.status(401).json({msg: 'User exists'})
         }else {
-            const sql = "INSERT INTO regusers (username, password) VALUES (?, ?)";
+            const sql = "INSERT INTO rcubedb.regusers (username, password) VALUES (?, ?)";
             const values = [username, password];
         
             try {
