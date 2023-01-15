@@ -47,15 +47,14 @@ app.post('/api/results', (req, res) => {
 app.post('/api/timerstats', (req, res) => {
     const { avg } = req.body;
     console.log(avg);
-   
-    //connection.query('SELECT * FROM sampleappwca.RanksAverage INNER JOIN sampleappwca.Persons ON sampleappwca.Persons.id = sampleappwca.RanksAverage.personId WHERE sampleappwca.Persons.id = ?', [wcaid], (err, results) => {
-        //     if (err) {
-        //         console.log(err);
-        //     }
-        //     console.log(results);
-        //     res.setHeader('Content-Type', 'application/json');
-        //     res.json(results);
-        // })
+    connection.query("SELECT COUNT(*) +1 as position FROM sampleappwca.ranksaverage WHERE eventId = '333' AND best > 2 AND best < ?", [avg], (err, results) => {
+            if (err) {
+                console.log(err);
+            }
+            console.log(results);
+            res.setHeader('Content-Type', 'application/json');
+            res.json(results);
+        })
 });
 
 
