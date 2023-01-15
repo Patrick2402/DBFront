@@ -7,14 +7,8 @@ const cookieSession = require('cookie-session');
 const cookieParser = require('cookie-parser');
 const { application } = require('express');
 app.use(cookieParser());
-
-
-
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-
-
-
 app.use(cookieSession({
     name: 'session',
     keys: ['your_secret_key'],
@@ -25,7 +19,7 @@ app.use(cookieSession({
 const connection = mysql.createConnection({
     host: "127.0.0.1",
     user: "root",
-    password: "$Delfinek#21!",
+    password: "root",
 });
 
 connection.connect((err) => {
@@ -36,24 +30,52 @@ connection.connect((err) => {
     }
 })
 
-
-app.get('/api/users', (req, res) => {
-    connection.query("select * from SampleApp.Results where personName = 'Patryk Zawieja'", (err, results) => {
-        if (err) {
-            console.log(err);
-        }
-        console.log(results)
-        res.setHeader('Content-Type', 'application/json');
-        res.json(results);
-    });
+app.post('/api/results', (req, res) => {
+    const { wcaid } = req.body;
+    console.log(wcaid);
+   
+    connection.query('SELECT * FROM sampleappwca.RanksAverage INNER JOIN sampleappwca.Persons ON sampleappwca.Persons.id = sampleappwca.RanksAverage.personId WHERE sampleappwca.Persons.id = ?', [wcaid], (err, results) => {
+            if (err) {
+                console.log(err);
+            }
+            console.log(results);
+            res.setHeader('Content-Type', 'application/json');
+            res.json(results);
+        })
 });
+
+app.post('/api/timerstats', (req, res) => {
+    const { avg } = req.body;
+    console.log(avg);
+   
+    //connection.query('SELECT * FROM sampleappwca.RanksAverage INNER JOIN sampleappwca.Persons ON sampleappwca.Persons.id = sampleappwca.RanksAverage.personId WHERE sampleappwca.Persons.id = ?', [wcaid], (err, results) => {
+        //     if (err) {
+        //         console.log(err);
+        //     }
+        //     console.log(results);
+        //     res.setHeader('Content-Type', 'application/json');
+        //     res.json(results);
+        // })
+});
+
+
+// app.post('/api/users', (req, res) => {
+//     connection.query("select * from sampleappwca.Results where personName = 'Patryk Zawieja'", (err, results) => {
+//         if (err) {
+//             console.log(err);
+//         }
+//         console.log(results)
+//         res.setHeader('Content-Type', 'application/json');
+//         res.json(results);
+//     });
+// });
 
 app.post('/api/login_req', async (req, res) => {
     const { username, password } = req.body;
 
     try {
         // get the user from the database
-        const [rows, fields] = await connection.promise().query('SELECT * FROM rcubedb.regusers WHERE username = ?', [username]);
+        const [rows, fields] = await connection.promise().query('SELECT * FROM sampleappwca.users WHERE username = ?', [username]);
         const user = rows[0];
 
         // check if user exists
@@ -81,19 +103,19 @@ app.post('/api/logout', (req, res) => {
     res.json({ msg: 'Logged out' });
 });
 
-app.post('/api/sign',async (req,res) =>{
-    const {username, password} = req.body;
-    console.log(username,password)
-    try{
-        const [rows, fields] = await connection.promise().query('SELECT * FROM rcubedb.regusers WHERE username = ?', [username]);
+app.post('/api/sign', async (req, res) => {
+    const { username, password } = req.body;
+    console.log(username, password)
+    try {
+        const [rows, fields] = await connection.promise().query('SELECT * FROM sampleappwca.users WHERE username = ?', [username]);
         const user = rows[0];
         console.log(user)
-        if(user){
-            res.status(401).json({msg: 'User exists'})
-        }else {
-            const sql = "INSERT INTO rcubedb.regusers (username, password) VALUES (?, ?)";
+        if (user) {
+            res.status(401).json({ msg: 'User exists' })
+        } else {
+            const sql = "INSERT INTO sampleappwca.users (username, password) VALUES (?, ?)";
             const values = [username, password];
-        
+
             try {
                 await connection.promise().query(sql, values);
                 console.log("1 record inserted");
@@ -103,10 +125,10 @@ app.post('/api/sign',async (req,res) =>{
                 res.status(500).json({ msg: 'Server error' });
             }
         }
-        
-    }catch (error){
+
+    } catch (error) {
         console.log(error);
-        res.status(500).json({msg: 'Server error'});
+        res.status(500).json({ msg: 'Server error' });
     }
 
 })
