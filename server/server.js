@@ -46,16 +46,76 @@ app.post('/api/results', (req, res) => {
 
 app.post('/api/timerstats', (req, res) => {
     const { avg } = req.body;
-    console.log(avg);
+
     connection.query("SELECT COUNT(*) +1 as position FROM sampleappwca.ranksaverage WHERE eventId = '333' AND best > 2 AND best < ?", [avg], (err, results) => {
             if (err) {
                 console.log(err);
             }
-            console.log(results);
             res.setHeader('Content-Type', 'application/json');
             res.json(results);
         })
 });
+
+app.post('/api/singleranks', (req, res) => {
+    const { sin } = req.body;
+    console.log(sin);
+    connection.query("SELECT COUNT(*) +1 as singlepos FROM sampleappwca.rankssingle WHERE eventId = '333' AND best > 2 AND best < ?", [sin], (err, resu) => {
+            if (err) {
+                console.log(err);
+            }
+            console.log(resu);
+            res.setHeader('Content-Type', 'application/json');
+            res.json(resu);
+        })
+});
+app.post('/api/rankings', (req, res) => {
+    const {country, event, option} = req.body;
+    console.log(event);
+    const query = option === "single" ? 
+        "call sampleappwca.get_best_country_and_event(?, ?);"
+        : "call sampleappwca.get_average_country_and_event(?, ?);";
+
+    connection.query(query, [event, country], (err, resu) => {
+            if (err) {
+                console.log(err);
+            }
+            console.log(resu);
+            res.setHeader('Content-Type', 'application/json');
+            res.json(resu);
+        })
+});
+
+const run_db_procedure = (proc) => {
+    app.get('/api/proc', (req, res) => {
+        connection.query("call ?;", [proc], (err, resus) => {
+            if (err) {
+                console.log(err);
+            }
+            res.setHeader('Content-Type', 'application/json');
+            res.json(resus);
+        })
+    })
+}
+
+app.get('/api/countries',(req,res) => {
+    connection.query("SELECT id FROM sampleappwca.countries; ", (err, resus) => {
+        if (err) {
+            console.log(err);
+        }
+        res.setHeader('Content-Type', 'application/json');
+        res.json(resus);
+    })
+})
+
+app.get('/api/events',(req,res) => {
+    connection.query("SELECT id FROM sampleappwca.events; ", (err, resus) => {
+        if (err) {
+            console.log(err);
+        }
+        res.setHeader('Content-Type', 'application/json');
+        res.json(resus);
+    })
+})
 
 
 // app.post('/api/users', (req, res) => {
