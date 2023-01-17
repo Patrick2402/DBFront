@@ -17,7 +17,7 @@ app.use(cookieSession({
 
 
 const connection = mysql.createConnection({
-    host: "127.0.0.1",
+    host: "localhost",
     user: "root",
     password: "root",
 });
@@ -48,6 +48,17 @@ app.post('/api/timerstats', (req, res) => {
     const { avg } = req.body;
 
     connection.query("SELECT COUNT(*) +1 as position FROM sampleappwca.ranksaverage WHERE eventId = '333' AND best > 2 AND best < ?", [avg], (err, results) => {
+            if (err) {
+                console.log(err);
+            }
+            res.setHeader('Content-Type', 'application/json');
+            res.json(results);
+        })
+});
+app.post('/api/timerstats_two', (req, res) => {
+    const { avg } = req.body;
+
+    connection.query("call sampleappwca.player_wins_tournaments(?, \"_Europe\");", [avg], (err, results) => {
             if (err) {
                 console.log(err);
             }
